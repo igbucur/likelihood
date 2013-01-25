@@ -4,6 +4,8 @@ OBJ_DIR = $(ROOT_DIR)/build
 BIN_DIR = $(ROOT_DIR)/bin
 
 RC := root-config
+INC_BOOST = ~/boost_1_52_0
+LIB_BOOST = ~/boost_1_52_0/stage/lib
 INC_DIR := $(shell $(RC) --incdir)
 LIB_DIR := $(shell $(RC) --libdir)
 MATHLIBS = -lRooFitCore -lRooFit -lRooStats -lHistFactory
@@ -39,11 +41,11 @@ $(TEST):	$(TESTOBJ)
 
 all: ll
 
-$(OBJ_FILES): $(CPP_FILES)
-	$(CXX) $(CXXFLAGS) -I$(INC_DIR) -c -o $@ $<
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cxx
+	$(CXX) $(CXXFLAGS) -I$(INC_DIR) -I$(INC_BOOST) -c -o $@ $<
 
 ll: $(OBJ_FILES)
-	$(CXX) $(LDFLAGS) -L$(LIB_DIR) $(LIBS) $^ -o $(BIN_DIR)/$@
+	$(CXX) $(LDFLAGS) -L$(LIB_DIR) -L$(LIB_BOOST) $(LIBS) $^ -o $(BIN_DIR)/$@
 
 print:
 	@echo "$(CPP_FILES)"
