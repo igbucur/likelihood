@@ -1,5 +1,6 @@
-#include "LikelihoodModel.h"
-#include "Addition.h"
+#include "Likelihood.h"
+#include "Computable.h"
+
 
 int main()
 {
@@ -10,10 +11,20 @@ int main()
 //         std::function<double(double, double)>
 //      )>
 //   > l;
-//
-   
-   
-   LikelihoodModel<3> ll(std::set<Computable>());
+
+   Computable c1, c2, c3;
+
+   std::vector<Computable> entities;
+   entities.push_back(c1);   
+   entities.push_back(c2);   
+   entities.push_back(c3);   
+
+   Likelihood<function_traits<decltype(func)>::result_type, function_traits<decltype(func)>::args_type> like(func);
+ 
+//   Likelihood<decltype(ll), decltype(fLL)::result_type, decltype(fLL)::argument_type> like(fLL); 
+//   Likelihood<decltype(ll), decltype(ll)::result_type, decltype(ll)::argument_type> l(ll); 
+//   LikelihoodModel<4> ll(entities);
+//   l.Print();
 }
 
 

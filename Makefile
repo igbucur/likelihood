@@ -1,11 +1,12 @@
-ROOT_DIR = /home/x11bucur/likelihood
+HOME = /home/x11bucur
+ROOT_DIR = $(HOME)/likelihood
 SRC_DIR = $(ROOT_DIR)/src
 OBJ_DIR = $(ROOT_DIR)/build
 BIN_DIR = $(ROOT_DIR)/bin
 
 RC := root-config
-INC_BOOST = ~/boost_1_52_0
-LIB_BOOST = ~/boost_1_52_0/stage/lib
+INC_BOOST = $(HOME)/boost_1_52_0
+LIB_BOOST = $(HOME)/boost_1_52_0/stage/lib
 INC_DIR := $(shell $(RC) --incdir)
 LIB_DIR := $(shell $(RC) --libdir)
 MATHLIBS = -lRooFitCore -lRooFit -lRooStats -lHistFactory
@@ -20,6 +21,7 @@ OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(notdir $(basename $(CPP_FI
 
 endif
 
+CXX := color-g++ 
 LIBS := -lCore -lRIO
 CXXFLAGS = -g --std=c++11 -fopenmp
 LDFLAGS = -fopenmp
