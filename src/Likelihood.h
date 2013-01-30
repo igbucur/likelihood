@@ -8,11 +8,11 @@
 #include <set>
 #include "Model.h"
 
-template <typename R, typename Pack>
+template <typename Func>
 class Likelihood;
 
 template <typename R, typename... Args>
-class Likelihood <R, std::tuple<Args...>>
+class Likelihood <std::function<R(Args...)>>
 {
 private:
    std::function<R(Args...)> fModel;

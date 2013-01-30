@@ -19,7 +19,7 @@ int main()
    entities.push_back(c2);   
    entities.push_back(c3);   
 
-   Likelihood<function_traits<decltype(func)>::result_type, function_traits<decltype(func)>::args_type> like(func);
+   Likelihood<decltype(func)> like(func);
 
    std::cout << like.Evaluate(1.0, 1.0) << std::endl; 
 //   Likelihood<decltype(ll), decltype(fLL)::result_type, decltype(fLL)::argument_type> like(fLL); 
