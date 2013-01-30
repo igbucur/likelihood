@@ -22,8 +22,8 @@ public:
 
 
 
-   Double_t Evaluate(Args...) {
-      return 0.0;
+   R Evaluate(Args... args) {
+      return fModel(args...);
    }
   
    void Print() {
