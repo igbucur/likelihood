@@ -23,7 +23,7 @@ endif
 
 CXX := color-g++ 
 LIBS := -lCore -lRIO
-CXXFLAGS = -g --std=c++11 -fopenmp
+CXXFLAGS = -Wall -g --std=c++11 -fopenmp
 LDFLAGS = -fopenmp
 
 

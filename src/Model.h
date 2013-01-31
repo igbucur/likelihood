@@ -7,7 +7,10 @@
 
 static auto gGaussian = [] (double x, double m, double s) { double r = (x - m) / s; return std::exp(-(r*r)) / s; };
 static auto gPoisson = [] (int x, double m) { return std::exp(-m) * std::pow(m, x); }; 
-
+static std::function<double(std::tuple<double, double>, std::tuple<double>)> newFunc = [] (std::tuple<double, double> obs, std::tuple<double> nuis) {
+   return gGaussian(std::get<0>(obs), std::get<0>(nuis), std::get<0>(nuis)) *
+      gPoisson(std::get<1>(obs), std::get<0>(nuis));
+};
 
 /*template <typename... Args> struct variadic_typedef {};
 
@@ -33,7 +36,18 @@ struct function_signature<R, std::tuple<Args...>>
 };
 
 
+template <std::size_t N, typename... Args, typename Func>
+typename std::enable_if<N >= 1>::type iterate(std::tuple<Args...> t, Func& f)
+{
+   f(std::get<N - 1>(t));
+   iterate<N - 1>(t, f);
+}
 
+template <std::size_t N, typename... Args, typename Func>
+typename std::enable_if<N == 0>::type iterate(std::tuple<Args...> t, Func& f)
+{
+   // nothing to do
+}
 */
 
 template <typename T>
@@ -48,6 +62,15 @@ struct function_traits<std::function<R(Args...)>>
 
    typedef std::tuple<Args...> args_type;
 };
+
+
+template <typename...> struct join;
+template <typename... Args1, typename... Args2>
+struct join<std::tuple<Args1...>, std::tuple<Args2...>>
+{
+   typedef std::tuple<Args1..., Args2...> type;
+};
+
 
 
 auto ll = [] (double x, double y)->double { return gGaussian(x, y, y) * gPoisson(x, y); };
