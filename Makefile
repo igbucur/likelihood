@@ -11,7 +11,6 @@ INC_DIR := $(shell $(RC) --incdir)
 LIB_DIR := $(shell $(RC) --libdir)
 MATHLIBS = -lRooFitCore -lRooFit -lRooStats -lHistFactory
 
-
 #------------------------------------------------------------------------------
 
 ifeq ($(shell $(RC) --has-roofit),yes)
@@ -22,7 +21,7 @@ OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(notdir $(basename $(CPP_FI
 endif
 
 CXX := color-g++ 
-LIBS := -lCore -lRIO
+LIBS := -lCore -lRIO -lMathCore -lMinuit2 
 CXXFLAGS = -Wall -g --std=c++11 -fopenmp
 LDFLAGS = -fopenmp
 

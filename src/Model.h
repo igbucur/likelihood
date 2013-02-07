@@ -6,11 +6,15 @@
 #include "Rtypes.h"
 
 static auto gGaussian = [] (double x, double m, double s) { double r = (x - m) / s; return std::exp(-(r*r)) / s; };
-static auto gPoisson = [] (int x, double m) { return std::exp(-m) * std::pow(m, x); }; 
-static std::function<double(std::tuple<double, double>, std::tuple<double>)> newFunc = [] (std::tuple<double, double> obs, std::tuple<double> nuis) {
-   return gGaussian(std::get<0>(obs), std::get<0>(nuis), std::get<0>(nuis)) *
+static auto gPoisson = [] (UInt_t x, double m) { return std::exp(-m) * std::pow(m, x); }; 
+static std::function<double(std::tuple<double, UInt_t>, std::tuple<double>)> newFunc = [] (std::tuple<double, UInt_t> obs, std::tuple<double> nuis) {
+   return gGaussian(std::get<0>(obs), std::get<0>(nuis), 1.0) *
       gPoisson(std::get<1>(obs), std::get<0>(nuis));
 };
+static auto f = [](std::tuple<double> obs, std::tuple<double> nuis) {
+   return 0.0;
+};
+
 
 /*template <typename... Args> struct variadic_typedef {};
 
