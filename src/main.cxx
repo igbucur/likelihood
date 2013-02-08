@@ -24,12 +24,14 @@ Double_t RawFunc(const Double_t* x) {
 
 int main()
 {
+   
+
    auto t1 = std::make_tuple(2.0, 1);
    auto t2 = std::make_tuple(0.0, 3);
    auto t3 = std::make_tuple(-1.0, 0);
 
    std::vector<std::tuple<double, UInt_t>> data = {t1, t2, t3};
-   
+/*   
    Likelihood<decltype(newFunc)> ll(newFunc, data); 
    std::cout << ll.Evaluate(0.1) << std::endl;
 
@@ -58,7 +60,7 @@ int main()
 
    xs = m1.X();
    std::cout << "Minimum: f(" << xs[0] << "): " << m1.MinValue() << std::endl;
-
+*/
 /*   
    std::vector<double> v1 = {2.0, 5.0, 3.0};
    std::vector<double> v2 = {1.0, 4.0, 6.0};

@@ -7,13 +7,11 @@
 
 static auto gGaussian = [] (double x, double m, double s) { double r = (x - m) / s; return std::exp(-(r*r)) / s; };
 static auto gPoisson = [] (UInt_t x, double m) { return std::exp(-m) * std::pow(m, x); }; 
-static std::function<double(std::tuple<double, UInt_t>, std::tuple<double>)> newFunc = [] (std::tuple<double, UInt_t> obs, std::tuple<double> nuis) {
+auto lambdaFunc =  [] (std::tuple<double, UInt_t> obs, std::tuple<double> nuis) {
    return gGaussian(std::get<0>(obs), std::get<0>(nuis), 1.0) *
       gPoisson(std::get<1>(obs), std::get<0>(nuis));
 };
-static auto f = [](std::tuple<double> obs, std::tuple<double> nuis) {
-   return 0.0;
-};
+
 
 
 /*template <typename... Args> struct variadic_typedef {};
@@ -75,10 +73,7 @@ struct join<std::tuple<Args1...>, std::tuple<Args2...>>
    typedef std::tuple<Args1..., Args2...> type;
 };
 
-
-
-auto ll = [] (double x, double y)->double { return gGaussian(x, y, y) * gPoisson(x, y); };
-static std::function<double(double, double)> func = ll;
+auto mm = [] (double x, double y)->double { return gGaussian(x, y, y) * gPoisson(x, y); };
 
 
 
