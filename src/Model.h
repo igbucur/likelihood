@@ -14,6 +14,32 @@ auto lambdaFunc =  [] (std::tuple<double, UInt_t> obs, std::tuple<double> nuis) 
 
 
 
+template <typename T> struct remove_class;
+template <typename R, typename C, typename... A>
+struct remove_class<R (C::*)(A...)> { using type = R(A...); };
+template <typename R, typename C, typename... A>
+struct remove_class<R (C::*)(A...) const > { using type = R(A...); };
+template <typename R, typename C, typename... A>
+struct remove_class<R (C::*)(A...) volatile> { using type = R(A...); };
+template <typename R, typename C, typename... A>
+struct remove_class<R (C::*)(A...) const volatile> { using type = R(A...); };
+
+template <typename T>
+struct get_signature { using type = typename remove_class<decltype(&std::remove_reference<T>::type::operator())>::type; };
+template <typename R, typename... A>
+struct get_signature<R(A...)> { using type = R(A...); };
+template <typename R, typename... A>
+struct get_signature<R(&)(A...)> { using type = R(A...); };
+template <typename R, typename... A>
+struct get_signature<R(*)(A...)> { using type = R(A...); };
+
+template <typename F> using make_function_type = std::function<typename get_signature<F>::type>;
+template <typename F> make_function_type<F> make_function(F &&f) {
+	return make_function_type<F>(std::forward<F>(f));
+}
+
+
+
 /*template <typename... Args> struct variadic_typedef {};
 
 /template <typename... Args>

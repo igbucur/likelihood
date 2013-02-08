@@ -1,4 +1,4 @@
-HOME = /home/x11bucur
+HOME = /home/bob
 ROOT_DIR = $(HOME)/likelihood
 SRC_DIR = $(ROOT_DIR)/src
 OBJ_DIR = $(ROOT_DIR)/build
@@ -13,14 +13,12 @@ MATHLIBS = -lRooFitCore -lRooFit -lRooStats -lHistFactory
 
 #------------------------------------------------------------------------------
 
-ifeq ($(shell $(RC) --has-roofit),yes)
 
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cxx)
 OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(notdir $(basename $(CPP_FILES)))))
 
-endif
 
-CXX := color-g++ 
+CXX := g++
 LIBS := -lCore -lRIO -lMathCore -lMinuit2 
 CXXFLAGS = -Wall -g --std=c++11 -fopenmp
 LDFLAGS = -fopenmp
