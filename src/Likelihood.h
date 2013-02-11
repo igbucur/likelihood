@@ -17,14 +17,17 @@ class Likelihood < <lambda(std::tuple<Obs...>, std::tuple<Nuis...>)> >
    Likelihood(<lambda(std::tuple<Obs...>, std::tuple<Nuis...>)> model) {}
 };
 */
-template <typename R, typename... Obs, typename... Nuis>
-class Likelihood <std::function<R(std::tuple<Obs...>, std::tuple<Nuis...>)>>
+template <typename R, typename TO, std::size_t NO, typename TP, std::size_t NP>
+class Likelihood <std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>
 {
    
 private:
-   std::function<R(std::tuple<Obs...>, std::tuple<Nuis...>)> fModel;
-   std::vector<std::tuple<Obs...>>& fData;
-   std::tuple<Nuis...> fParamValues;
+   std::function<R(std::array<TO, NO>, std::array<TP, NP>)> fModel;
+   std::vector<std::array<TO, NO>>& fData;
+   std::array<TP, NP> fParamValues;
+//   std::array<TO, NO> fValues;
+
+
 
 public:
 /*   Likelihood(std::function<R(std::tuple<Obs...>, std::tuple<Nuis...>)> model, std::tuple<Nuis...> nuisValues) : 
@@ -33,42 +36,33 @@ public:
       fParamValues(nuisValues) 
    { }
 */
-   Likelihood(std::function<R(std::tuple<Obs...>, std::tuple<Nuis...>)> model, std::vector<std::tuple<Obs...>>& data) :
+   Likelihood(std::function<R(std::array<TO, NO>, std::array<TP, NP>)>& model, std::vector<std::array<TO, NO>>& data) :
       fModel(model),
       fData(data),
       fParamValues()
    { }
 
+   R Evaluate(std::array<TO, NO>& values) {
+      return fModel(values, fParamValues);
+   }
 
-   R Evaluate(Obs... obs, Nuis... nuis) {
-      return fModel(std::tuple<Obs...>(obs...), std::tuple<Nuis...>(nuis...));
-   }
-   R Evaluate(Obs... obs) {
-      return fModel(std::tuple<Obs...>(obs...), fParamValues);
-   }
-   R Evaluate(Nuis... nuis) {
-      return Evaluate(std::make_tuple(nuis...));
-   }
-   R Evaluate(std::tuple<Nuis...> nuisTuple) {
+   R Evaluate(std::array<TP, NP>& paramValues) {
       Double_t result = 0.0;
       for (std::size_t i = 0; i < fData.size(); ++i) {
-         result += fModel(fData[i], nuisTuple);
+         result += fModel(fData[i], paramValues);
       }
       return result; 
    }
-
-   R Evaluate(std::tuple<std::vector<Obs>...> obsVec) {
-      std::size_t nPar = std::tuple_size<decltype(obsVec)>::value;
-      Int_t nObs = std::get<0>(obsVec).size();
-      for (Int_t i = 0; i < nObs; ++i) {
-         std::cout << i << std::endl; 
-      }
-      return 0.0;
+  
+   R Evaluate(const TP* paramValues) {
+      for (std::size_t i = 0; i < NP; ++i) fParamValues[i] = paramValues[i];
+      return Evaluate(fParamValues);
    }
-   R Evaluate(std::vector<std::tuple<Obs...>> tupVec) {
+  
+   R Evaluate(std::vector<std::array<TO, NO>> data) {
       Double_t result = 0.0;
-      for (std::size_t i =0; i < tupVec.size(); ++i) {
-         result += fModel(tupVec[i], fParamValues);   
+      for (std::size_t i =0; i < data.size(); ++i) {
+         result += fModel(data[i], fParamValues);   
       }
       return result;
    }

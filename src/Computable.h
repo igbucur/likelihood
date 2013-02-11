@@ -7,6 +7,7 @@
 
 // Basic computable entity (variable, function, PDF, etc...)
 //template <typename R, typename... Args>
+template <typename T>
 class Computable {
 
    enum Type { Functor, Variable };
@@ -14,13 +15,18 @@ private:
    static UInt_t fgIdCounter;
    UInt_t fId;
    Type fType;
-   Double_t fValue;
+   T fValue;
    Computable *fParent;
 
 //   std::vector<Computable<R, Args...>> fChildren;
 //   std::function<R(Args...)> fCompute;
 public:
-   Computable() {
+   Computable(T min, T max, T value) :
+      fMin(min),
+      fMax(max),
+      fValue(value) 
+      // must solve checks
+   {
       fId = fgIdCounter++;
    }
 
@@ -28,12 +34,14 @@ public:
    Type GetType() { return fType; }
 
    Double_t Evaluate() {
-      return 1.0;
+      return fValue;
    }
 //
 //   R Evaluate(Args&&... args) {
 //      return fCompute(args...);
 //   }
+   const T fMin;
+   const T fMax;
 };
 
 

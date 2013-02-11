@@ -3,16 +3,22 @@
 
 #include <functional>
 #include <cmath>
+#include <array>
 #include "Rtypes.h"
 
 static auto gGaussian = [] (double x, double m, double s) { double r = (x - m) / s; return std::exp(-(r*r)) / s; };
 static auto gPoisson = [] (UInt_t x, double m) { return std::exp(-m) * std::pow(m, x); }; 
-auto lambdaFunc =  [] (std::tuple<double, UInt_t> obs, std::tuple<double> nuis) {
-   return gGaussian(std::get<0>(obs), std::get<0>(nuis), 1.0) *
-      gPoisson(std::get<1>(obs), std::get<0>(nuis));
+static auto gExponential = [] (Double_t x, Double_t c) { return std::exp(x * c); }; // like RooFit for now
+
+auto lambdaFunc = [] (std::array<Double_t, 2> obs, std::array<Double_t, 1> nuis) {
+   return gGaussian(obs[0], nuis[0], 1.0) * gPoisson(obs[1], nuis[0]);
 };
 
 
+// nuisance parameters are: tau (exponential), nsig, nbkg
+static auto modelFunc = [] (std::array<Double_t, 1> obs, std::array<Double_t, 3> nuis) {
+   return nuis[1] * gGaussian(obs[0], 2.0, 0.5) + nuis[2] * gExponential(obs[0], nuis[0]);
+};
 
 template <typename T> struct remove_class;
 template <typename R, typename C, typename... A>

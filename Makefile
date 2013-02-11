@@ -1,4 +1,3 @@
-HOME = /home/bob
 ROOT_DIR = $(HOME)/likelihood
 SRC_DIR = $(ROOT_DIR)/src
 OBJ_DIR = $(ROOT_DIR)/build
@@ -18,8 +17,8 @@ CPP_FILES := $(wildcard $(SRC_DIR)/*.cxx)
 OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(notdir $(basename $(CPP_FILES)))))
 
 
-CXX := g++
-LIBS := -lCore -lRIO -lMathCore -lMinuit2 
+CXX := color-g++
+LIBS := -lCore -lRIO -lMathCore -lMinuit2 $(MATHLIBS) 
 CXXFLAGS = -Wall -g --std=c++11 -fopenmp
 LDFLAGS = -fopenmp
 

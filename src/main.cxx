@@ -2,7 +2,16 @@
 #include "LikelihoodWrapper.h"
 #include "Computable.h"
 #include "Math/Functor.h"
+#include "Fit/Fitter.h"
+#include "Fit/UnBinData.h"
 #include "Minuit2/Minuit2Minimizer.h"
+#include "TVirtualFitter.h"
+
+#include "RooAbsPdf.h"
+#include "RooWorkspace.h"
+#include "RooDataSet.h"
+#include "RooRandom.h"
+#include "RooRealVar.h"
 
 template <typename F>
 void probe_result_of (F f)
@@ -24,19 +33,43 @@ Double_t RawFunc(const Double_t* x) {
 
 int main()
 {
+   const std::size_t ENTRIES = 3;
+
+
+   RooWorkspace w("w");
+
+   w.factory("Exponential:bkg_pdf(x[0,10], a[-0.5, -1000, 0])");
+   w.factory("Gaussian:sig_pdf(x, mass[2], sigma[0.4])");
+   w.factory("SUM:model(nsig[30, 0, 1000] * sig_pdf, nbkg[1000, 0, 10000000] * bkg_pdf)"); // for extended model
+   RooRandom::randomGenerator()->SetSeed(111);
+   RooDataSet* rooData = w.pdf("model")->generate(*w.var("x"), ENTRIES);
+   w.import(*rooData);
+
+   std::vector<std::array<Double_t, 1>> data;
+   ROOT::Fit::UnBinData fitData(ENTRIES, 1, kFALSE);
+   for (std::size_t i = 0; i < ENTRIES; ++i) {
+      const RooArgSet* set = rooData->get(i);
+      data.push_back({{set->getRealValue("x")}});
+      fitData.Add(set->getRealValue("x"));
+   }
    
 
-   auto t1 = std::make_tuple(2.0, 1);
-   auto t2 = std::make_tuple(0.0, 3);
-   auto t3 = std::make_tuple(-1.0, 0);
+   Double_t x[3] = { 2.0, 5.0, 1.0 };
 
-   std::vector<std::tuple<double, UInt_t>> data = {t1, t2, t3};
-/*   
-   Likelihood<decltype(newFunc)> ll(newFunc, data); 
-   std::cout << ll.Evaluate(0.1) << std::endl;
+//   std::array<Double_t, 3> a = make<Double_t, ENTRIES>(x);
+//   std::cout << typeid(a).name() << std::endl;
+//   test<double> t;  
+//   CArray<Double_t, 3>::genArray(a, x);
+//   make<Int_t, 3, 2.0>(x);
 
-   LikelihoodWrapper<decltype(newFunc)> lw(ll);
+   auto stdFunc = make_function(modelFunc);
 
+//   LikelihoodWrapper<decltype(stdFunc)> lw(stdFunc, data);
+
+//   ROOT::Fit::Fitter fitter;
+//   fitter.LikelihoodFit<ROOT::Fit::UnBinData, ROOT::Math::IBaseFunctionMultiDim>(fitData, lw, kFALSE);
+
+/*
    Double_t param[1] = {0.1};
    Double_t step[1] = {1e-9};
    std::cout << lw(param) << std::endl;
@@ -60,8 +93,7 @@ int main()
 
    xs = m1.X();
    std::cout << "Minimum: f(" << xs[0] << "): " << m1.MinValue() << std::endl;
-*/
-/*   
+   
    std::vector<double> v1 = {2.0, 5.0, 3.0};
    std::vector<double> v2 = {1.0, 4.0, 6.0};
    
