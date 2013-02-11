@@ -7,12 +7,18 @@
 
 static auto gGaussian = [] (double x, double m, double s) { double r = (x - m) / s; return std::exp(-(r*r)) / s; };
 static auto gPoisson = [] (UInt_t x, double m) { return std::exp(-m) * std::pow(m, x); }; 
-auto lambdaFunc =  [] (std::tuple<double, UInt_t> obs, std::tuple<double> nuis) {
+static auto gExponential = [] (Double_t x, Double_t c) { return std::exp(x * c); }; // like RooFit for now
+
+auto lambdaFunc = [] (std::tuple<double, UInt_t> obs, std::tuple<double> nuis) {
    return gGaussian(std::get<0>(obs), std::get<0>(nuis), 1.0) *
       gPoisson(std::get<1>(obs), std::get<0>(nuis));
 };
 
-
+// nuisance parameters are: tau (exponential), nsig, nbkg
+// 
+static auto modelFunc = [] (std::tuple<double> obs, std::tuple<double, double, double> nuis) {
+   return std::get<1>(nuis) * gGaussian(std::get<0>(obs), 2.0, 0.5) + std::get<2>(nuis) * gExponential(std::get<0>(obs), std::get<0>(nuis));
+};
 
 template <typename T> struct remove_class;
 template <typename R, typename C, typename... A>

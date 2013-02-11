@@ -1,12 +1,11 @@
-HOME = /home/bob
 ROOT_DIR = $(HOME)/likelihood
 SRC_DIR = $(ROOT_DIR)/src
 OBJ_DIR = $(ROOT_DIR)/build
 BIN_DIR = $(ROOT_DIR)/bin
 
 RC := root-config
-INC_BOOST = $(HOME)/boost_1_52_0
-LIB_BOOST = $(HOME)/boost_1_52_0/stage/lib
+INC_BOOST := $(HOME)/boost_1_52_0
+LIB_BOOST := $(HOME)/boost_1_52_0/stage/lib
 INC_DIR := $(shell $(RC) --incdir)
 LIB_DIR := $(shell $(RC) --libdir)
 MATHLIBS = -lRooFitCore -lRooFit -lRooStats -lHistFactory

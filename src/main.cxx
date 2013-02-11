@@ -31,7 +31,9 @@ int main()
    auto t3 = std::make_tuple(-1.0, 0);
 
    std::vector<std::tuple<double, UInt_t>> data = {t1, t2, t3};
-/*   
+   
+   auto newFunc = make_function(lambdaFunc);
+
    Likelihood<decltype(newFunc)> ll(newFunc, data); 
    std::cout << ll.Evaluate(0.1) << std::endl;
 
@@ -60,7 +62,7 @@ int main()
 
    xs = m1.X();
    std::cout << "Minimum: f(" << xs[0] << "): " << m1.MinValue() << std::endl;
-*/
+
 /*   
    std::vector<double> v1 = {2.0, 5.0, 3.0};
    std::vector<double> v2 = {1.0, 4.0, 6.0};
