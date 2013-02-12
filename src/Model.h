@@ -5,19 +5,37 @@
 #include <cmath>
 #include <array>
 #include "Rtypes.h"
+#include "Math/Math.h"
 
-static auto gGaussian = [] (double x, double m, double s) { double r = (x - m) / s; return std::exp(-(r*r)) / s; };
-static auto gPoisson = [] (UInt_t x, double m) { return std::exp(-m) * std::pow(m, x); }; 
-static auto gExponential = [] (Double_t x, Double_t c) { return std::exp(x * c); }; // like RooFit for now
+static std::size_t quickFactorial(std::size_t n) {
+   std::size_t result = 1;
+   for (std::size_t i = 1; i < n; ++i) result *= i;
+   return result;
+}
 
-auto lambdaFunc = [] (std::array<Double_t, 2> obs, std::array<Double_t, 1> nuis) {
+static auto gGaussian = [] (double x, double m, double s) { 
+   double r = (x - m) / s; 
+   return std::exp(-(r*r*0.5)) / (s * std::sqrt(2 * ROOT::Math::Pi())); 
+};
+
+static auto gPoisson = [] (UInt_t x, double m) { 
+   Double_t result = -m;
+   for (UInt_t i = 1; i < x; ++i) result += std::log(m) - std::log(i);
+
+   return std::exp(result);
+}; 
+static auto gExponential = [] (Double_t x, Double_t c) { 
+   return std::exp(x * c) * (-c); 
+}; // like RooFit for now
+
+static auto lambdaFunc = [] (std::array<Double_t, 2> obs, std::array<Double_t, 1> nuis) {
    return gGaussian(obs[0], nuis[0], 1.0) * gPoisson(obs[1], nuis[0]);
 };
 
 
 // nuisance parameters are: tau (exponential), nsig, nbkg
 static auto modelFunc = [] (std::array<Double_t, 1> obs, std::array<Double_t, 3> nuis) {
-   return nuis[1] * gGaussian(obs[0], 2.0, 0.5) + nuis[2] * gExponential(obs[0], nuis[0]);
+   return /*gPoisson(30, nuis[1]) */ gGaussian(obs[0], 2.0, 0.5) + /*gPoisson(1000, nuis[2]) */ gExponential(obs[0], nuis[0]);
 };
 
 template <typename T> struct remove_class;

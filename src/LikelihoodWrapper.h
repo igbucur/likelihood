@@ -42,6 +42,8 @@ struct CArray
    }*/
 };
 
+/*
+// Compile-time C array to std::array (only works for integers)
 template <typename U>
 constexpr U get(std::size_t i, U* cArr) { return cArr[i]; }
 
@@ -53,7 +55,7 @@ template <typename T, std::size_t N, T... Vals>
 constexpr
 typename std::enable_if<N != sizeof...(Vals), std::array<T, N>>::type
 make(T* cArr) { return make<T, N, Vals..., get<T>(sizeof...(Vals), cArr)>(cArr); }
-
+*/
 
 template <typename Head, typename... Tail>
 struct MakeTuple;
@@ -77,6 +79,8 @@ struct MakeTuple
    }
 };
 
+
+
 template <typename FuncType>
 class LikelihoodWrapper;
 
@@ -85,8 +89,14 @@ class LikelihoodWrapper<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>
 public:
    
    LikelihoodWrapper(std::function<R(std::array<TO, NO>, std::array<TP, NP>)>& model, std::vector<std::array<TO, NO>>& data) : Likelihood<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>(model, data) {}
+
+   LikelihoodWrapper(const LikelihoodWrapper<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>& rhs) : 
+      Likelihood<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>(rhs),
+      fParams(rhs.fParams)
+   { }
+
    UInt_t NDim() const { return NO; }
-   LikelihoodWrapper* Clone() const { return NULL; };
+   LikelihoodWrapper* Clone() const { return new LikelihoodWrapper<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>(*this); };
 
    const Double_t* Parameters() const { 
       Double_t* params = new Double_t[NP];
@@ -98,28 +108,30 @@ public:
    };
    UInt_t NPar() const { return NP; }
 
-private: 
-   std::array<TO, NO> fValues;
+private:
    std::array<TP, NP> fParams;
  
    Double_t DoEval(const Double_t* x) const {
       //SetValues(x);
       std::array<TO, NO> values;
       std::copy(x, x + NO, values.begin());
-      return Evaluate(values);  
+      return -this->Evaluate(values);  
    }
    Double_t DoEvalPar(const Double_t* x, const Double_t* p) const { 
       std::array<TO, NO> values;
-      
+      std::copy(x, x + NO, values.begin());      
       std::array<TP, NP> params;
+      std::copy(p, p + NP, params.begin());
 
+      std::cout << values[0] << std::endl;
+      std::cout << params[0] << std::endl;
+      std::cout << params[1] << std::endl;
+      std::cout << params[2] << std::endl;
       //SetValues(x);
       //SetParameters(p);
-      return Evaluate(values, params);
-   }
-
-   void SetValues(const Double_t* x) {
-      std::copy(x, x + NO, fValues.begin());
+      Double_t result = -this->Evaluate(values, params);
+      std::cout << "Result of evaluation " << result << std::endl;
+      return result;
    }
 };
 

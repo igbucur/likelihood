@@ -30,19 +30,19 @@ private:
 
 
 public:
-/*   Likelihood(std::function<R(std::tuple<Obs...>, std::tuple<Nuis...>)> model, std::tuple<Nuis...> nuisValues) : 
-      fModel(model),
-      fData(0),
-      fParamValues(nuisValues) 
-   { }
-*/
    Likelihood(std::function<R(std::array<TO, NO>, std::array<TP, NP>)>& model, std::vector<std::array<TO, NO>>& data) :
       fModel(model),
       fData(data),
       fParamValues()
    { }
 
-   R Evaluate(std::array<TO, NO>& values) {
+   Likelihood(const Likelihood<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>& rhs):
+      fModel(rhs.fModel),
+      fData(rhs.fData),
+      fParamValues(rhs.fParamValues)
+   { }
+
+   R Evaluate(std::array<TO, NO>& values) const {
       return fModel(values, fParamValues);
    }
 
@@ -52,6 +52,10 @@ public:
          result += fModel(fData[i], paramValues);
       }
       return result; 
+   }
+
+   R Evaluate(const std::array<TO, NO>& values, const std::array<TP, NP>& paramValues) const {
+      return fModel(values, paramValues);
    }
   
    R Evaluate(const TP* paramValues) {
