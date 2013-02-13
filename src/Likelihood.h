@@ -42,11 +42,8 @@ public:
       fParamValues(rhs.fParamValues)
    { }
 
-   R Evaluate(std::array<TO, NO>& values) const {
-      return fModel(values, fParamValues);
-   }
 
-   R Evaluate(std::array<TP, NP>& paramValues) {
+   R Evaluate(std::array<TP, NP>& paramValues) const {
       Double_t result = 0.0;
       for (std::size_t i = 0; i < fData.size(); ++i) {
          result += fModel(fData[i], paramValues);

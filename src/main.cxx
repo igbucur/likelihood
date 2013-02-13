@@ -9,6 +9,7 @@
 #include "Fit/UnBinData.h"
 #include "Minuit2/Minuit2Minimizer.h"
 #include "TVirtualFitter.h"
+#include "TStopwatch.h"
 
 #include "RooAbsPdf.h"
 #include "RooWorkspace.h"
@@ -37,42 +38,59 @@ Double_t RawFunc(const Double_t* x) {
 
 int main()
 {
-   const std::size_t ENTRIES = 10;
-
+   const std::size_t ENTRIES = 1030;
+   const Int_t RUNS = 1000;
+   TStopwatch sw;
    RooWorkspace w("w");
 
-   w.factory("Exponential:bkg_pdf(x[0,10], a[-0.5, -1000, 0])");
+   w.factory("Exponential:bkg_pdf(x[0,1000], a[-0.5, -1000, 0])");
    w.factory("Gaussian:sig_pdf(x, mass[2], sigma[0.5])");
    w.factory("SUM:model(nsig[30, 0, 1000] * sig_pdf, nbkg[1000, 0, 10000000] * bkg_pdf)"); // for extended model
    RooRandom::randomGenerator()->SetSeed(111);
+//   RooDataSet* rooData = w.pdf("bkg_pdf")->generate(*w.var("x"), ENTRIES);
    RooDataSet* rooData = w.pdf("model")->generate(*w.var("x"), ENTRIES);
+//   RooDataSet* rooData = new RooDataSet("data", "data", *w.var("x"));
    w.import(*rooData);
-
+/*
+   sw.Start();
+   for (Int_t i = 1; i < RUNS; ++i)
+      w.pdf("model")->fitTo(*rooData, RooFit::Minimizer("Minuit2", "Migrad"));
    RooFitResult* r = w.pdf("model")->fitTo(*rooData, RooFit::Save(kTRUE), RooFit::Minimizer("Minuit2", "Migrad"));
+   sw.Print();
    r->Print();
-   
+*/ 
    std::vector<std::array<Double_t, 1>> data;
-   ROOT::Fit::UnBinData fitData(ENTRIES, 1, kFALSE);
+//   ROOT::Fit::UnBinData fitData(ENTRIES, 1, kFALSE);
    for (std::size_t i = 0; i < ENTRIES; ++i) {
       const RooArgSet* set = rooData->get(i);
       data.push_back({{set->getRealValue("x")}});
-      fitData.Add(set->getRealValue("x"));
-     // std::cout << "x = " << set->getRealValue("x") << std::endl;
+//      fitData.Add(set->getRealValue("x"));
+//      std::cout << "x = " << set->getRealValue("x") << std::endl;
+//      std::cout << data[0][0] << std::endl;
    }
 
    
+//   auto stdFunc = make_function(bkgFunc);
    auto stdFunc = make_function(modelFunc);
    LikelihoodWrapper<decltype(stdFunc)> lw(stdFunc, data);
 
    ROOT::Fit::Fitter fitter; 
-   fitter.SetFunction(lw);
-
    fitter.Config().SetMinimizer("Minuit2", "Migrad");
-   fitter.Config().ParSettings(0).Set("a", -0.5, 0.01, -1000.0, 0.0);
-   fitter.Config().ParSettings(1).Set("nsig", 30, 0.01, 0.0, 1000.0);
-   fitter.Config().ParSettings(2).Set("nbkg", 1000.0, 0.01, 0.0, 1000000.0);
-   std::cout << "Poisson: " << gPoisson(30, 30.0) << std::endl;
-   std::cout << "Poisson: " << gPoisson(1000, 1000.0) << std::endl;
+   fitter.Config().ParamsSettings().push_back(ROOT::Fit::ParameterSettings("a", -0.5, 100.0, -1000.0, 0.0));
+   fitter.Config().ParamsSettings().push_back(ROOT::Fit::ParameterSettings("nsig", 30.0, 100.0, 0.0, 1000.0));
+   fitter.Config().ParamsSettings().push_back(ROOT::Fit::ParameterSettings("nbkg", 1000.0, 100000.0, 0, 1000000.0));
+
+   sw.Start();
+   for (Int_t i = 0; i < RUNS; ++i) fitter.FitFCN(lw);
+   sw.Print();
+   fitter.Result().Print(std::cout, false);
+
+
+//   fitter.Config().ParSettings(0).Set("a", -0.5, 0.01, -1000.0, 0.0);
+//   fitter.Config().ParSettings(1).Set("nsig", 30, 0.01, 0.0, 1000.0);
+//   fitter.Config().ParSettings(2).Set("nbkg", 1000.0, 0.01, 0.0, 1000000.0);
+//   std::cout << "Poisson: " << gPoisson(30, 30.0) << std::endl;
+//   std::cout << "Poisson: " << gPoisson(1000, 1000.0) << std::endl;
 /*   config.ParSettings(1).SetName("nsig");
    config.ParSettings(1).SetValue(30);
    config.ParSettings(1).SetLimits(0, 1000);
@@ -80,12 +98,8 @@ int main()
    config.ParSettings(2).SetValue(1000);
    config.ParSettings(2).SetLimits(0, 1000000);
 */   
-    
-   fitter.LikelihoodFit(fitData);   
 
-   const ROOT::Fit::FitResult& result = fitter.Result();
 
-   result.Print(std::cout, false);
 
 /*
    Double_t param[1] = {0.1};

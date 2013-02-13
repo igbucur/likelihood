@@ -85,53 +85,24 @@ template <typename FuncType>
 class LikelihoodWrapper;
 
 template <typename R, typename TO, std::size_t NO, typename TP, std::size_t NP>
-class LikelihoodWrapper<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>> : public Likelihood<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>, public ROOT::Math::IParametricFunctionMultiDim {
+class LikelihoodWrapper<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>> : public Likelihood<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>, public ROOT::Math::IBaseFunctionMultiDim {
 public:
    
    LikelihoodWrapper(std::function<R(std::array<TO, NO>, std::array<TP, NP>)>& model, std::vector<std::array<TO, NO>>& data) : Likelihood<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>(model, data) {}
 
    LikelihoodWrapper(const LikelihoodWrapper<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>& rhs) : 
-      Likelihood<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>(rhs),
-      fParams(rhs.fParams)
+      Likelihood<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>(rhs)
    { }
 
-   UInt_t NDim() const { return NO; }
+   UInt_t NDim() const { return NP; }
    LikelihoodWrapper* Clone() const { return new LikelihoodWrapper<std::function<R(std::array<TO, NO>, std::array<TP, NP>)>>(*this); };
 
-   const Double_t* Parameters() const { 
-      Double_t* params = new Double_t[NP];
-      std::copy(fParams.begin(), fParams.end(), params);
-      return params; 
-   }
-   void SetParameters(const Double_t* p) {
-      std::copy(p, p + NP, fParams.begin());
-   };
-   UInt_t NPar() const { return NP; }
-
 private:
-   std::array<TP, NP> fParams;
- 
    Double_t DoEval(const Double_t* x) const {
       //SetValues(x);
-      std::array<TO, NO> values;
-      std::copy(x, x + NO, values.begin());
-      return -this->Evaluate(values);  
-   }
-   Double_t DoEvalPar(const Double_t* x, const Double_t* p) const { 
-      std::array<TO, NO> values;
-      std::copy(x, x + NO, values.begin());      
-      std::array<TP, NP> params;
-      std::copy(p, p + NP, params.begin());
-
-      std::cout << values[0] << std::endl;
-      std::cout << params[0] << std::endl;
-      std::cout << params[1] << std::endl;
-      std::cout << params[2] << std::endl;
-      //SetValues(x);
-      //SetParameters(p);
-      Double_t result = -this->Evaluate(values, params);
-      std::cout << "Result of evaluation " << result << std::endl;
-      return result;
+      std::array<TP, NP> nuisanceParameters;
+      std::copy(x, x + NP, nuisanceParameters.begin());
+      return -this->Evaluate(nuisanceParameters); 
    }
 };
 

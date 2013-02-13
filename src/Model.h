@@ -35,8 +35,10 @@ static auto lambdaFunc = [] (std::array<Double_t, 2> obs, std::array<Double_t, 1
 
 // nuisance parameters are: tau (exponential), nsig, nbkg
 static auto modelFunc = [] (std::array<Double_t, 1> obs, std::array<Double_t, 3> nuis) {
-   return /*gPoisson(30, nuis[1]) */ gGaussian(obs[0], 2.0, 0.5) + /*gPoisson(1000, nuis[2]) */ gExponential(obs[0], nuis[0]);
+   return std::log(nuis[1] * gGaussian(obs[0], 2.0, 0.5) + nuis[2] * gExponential(obs[0], nuis[0])) - (nuis[1] + nuis[2])/1030.0;
 };
+
+static auto bkgFunc = [] (std::array<Double_t, 1> obs, std::array<Double_t, 1> nuis) { return obs[0] * nuis[0] + std::log(-nuis[0]) - std::log(1.0 - std::exp(1000.0 * nuis[0])); };
 
 template <typename T> struct remove_class;
 template <typename R, typename C, typename... A>
